@@ -22,7 +22,7 @@ The best way to learn data wrangling skills is to apply them to a specific case 
 
 ```{r}
 #install packages
-install.packages("dplyr")
+#install.packages("dplyr")
 #install.packages("countrycode")
 
 votes <- readRDS("votes.rds")
@@ -50,7 +50,7 @@ Filter out rows where the vote recorded is "not present" or "not a member", leav
 ```{r}
 
 # Load the dplyr package
-library(dplyr)
+library("dplyr")
 
 # Print the votes dataset
 votes
