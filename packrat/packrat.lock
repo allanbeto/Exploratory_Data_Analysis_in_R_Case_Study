@@ -14,6 +14,11 @@ Source: CRAN
 Version: 2.2.2
 Hash: b2366cd9d2f3851a5704b4e192b985c2
 
+Package: RColorBrewer
+Source: CRAN
+Version: 1.1-2
+Hash: c0d56cd15034f395874c870141870c25
+
 Package: Rcpp
 Source: CRAN
 Version: 0.12.12
@@ -56,10 +61,20 @@ Version: 1.17.1
 Hash: 97cb6f6293cd18d17df77a6383cc6763
 Requires: bitops
 
+Package: colorspace
+Source: CRAN
+Version: 1.3-2
+Hash: 0bf8618b585fa98eb23414cd3ab95118
+
 Package: countrycode
 Source: CRAN
 Version: 0.19
 Hash: edf948180dbf4105b2ca27f3f8d269f1
+
+Package: dichromat
+Source: CRAN
+Version: 2.0-0
+Hash: 08eed0c80510af29bb15f840ccfe37ce
 
 Package: digest
 Source: CRAN
@@ -84,10 +99,21 @@ Source: CRAN
 Version: 1.5
 Hash: 258cf79a8dbeedf1c981cdb53837d2af
 
+Package: ggplot2
+Source: CRAN
+Version: 2.2.1
+Hash: 46e5cb78836848aa44655e577433f54b
+Requires: digest, gtable, lazyeval, plyr, reshape2, scales, tibble
+
 Package: glue
 Source: CRAN
 Version: 1.1.1
 Hash: dfd5a27768175ae51d08dc6beba1ef11
+
+Package: gtable
+Source: CRAN
+Version: 0.2.0
+Hash: cd78381a9d3fea966ac39bd0daaf5554
 
 Package: highr
 Source: CRAN
@@ -111,6 +137,16 @@ Version: 1.17
 Hash: f6b2bf543ee3e25f5b92bb46f9958c5f
 Requires: digest, evaluate, highr, markdown, stringr, yaml
 
+Package: labeling
+Source: CRAN
+Version: 0.3
+Hash: ecf589b42cd284b03a4beb9665482d3e
+
+Package: lazyeval
+Source: CRAN
+Version: 0.2.0
+Hash: 3d6e7608e65bbf5cb170dab1e3c9ed8b
+
 Package: magrittr
 Source: CRAN
 Version: 1.5
@@ -126,6 +162,12 @@ Package: mime
 Source: CRAN
 Version: 0.5
 Hash: 463550cf44fb6f0a2359368f42eebe62
+
+Package: munsell
+Source: CRAN
+Version: 0.4.3
+Hash: f96d896947fcaf9b6d0074002e9f4f9d
+Requires: colorspace
 
 Package: packrat
 Source: github
@@ -146,6 +188,18 @@ Source: CRAN
 Version: 0.1-1
 Hash: fb19215402e2d9f1c7f803dcaa806fc2
 
+Package: plyr
+Source: CRAN
+Version: 1.8.4
+Hash: 8fbaff6962e3421b5c9652eebae36159
+Requires: Rcpp
+
+Package: reshape2
+Source: CRAN
+Version: 1.4.2
+Hash: df8d1de05444abd99e423c1e3b84c9b0
+Requires: Rcpp, plyr, stringr
+
 Package: rlang
 Source: CRAN
 Version: 0.1.2
@@ -164,6 +218,13 @@ Version: 1.2
 Hash: fdcac51a7f47decd60556ceefc3c26b1
 Requires: backports
 
+Package: scales
+Source: CRAN
+Version: 0.5.0
+Hash: c108129462eb98e2699b07201fd12acf
+Requires: R6, RColorBrewer, Rcpp, dichromat, labeling, munsell, plyr,
+    viridisLite
+
 Package: stringi
 Source: CRAN
 Version: 1.1.5
@@ -180,6 +241,11 @@ Source: CRAN
 Version: 1.3.4
 Hash: 3111e0d62502af60fe0fa8b4213fedad
 Requires: Rcpp, rlang
+
+Package: viridisLite
+Source: CRAN
+Version: 0.2.0
+Hash: 10f0c25af3dc84eaae10f5854f47efdb
 
 Package: yaml
 Source: CRAN

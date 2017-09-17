@@ -24,9 +24,13 @@ The best way to learn data wrangling skills is to apply them to a specific case 
 #install packages
 #install.packages("dplyr")
 #install.packages("countrycode")
+# install.packages("ggplot2")
+
+library("dplyr")
+library("countrycode")
+library("ggplot2")
 
 votes <- readRDS("votes.rds")
-
 ```
 
 
@@ -48,7 +52,6 @@ Filter out rows where the vote recorded is "not present" or "not a member", leav
 
 
 ```{r}
-
 # Load the dplyr package
 library("dplyr")
 
@@ -56,9 +59,7 @@ library("dplyr")
 votes
 
 # Filter for votes that are "yes", "abstain", or "no"
-
 votes %>% filter(vote <= 3)
-
 ```
 
 ### Adding a year column
@@ -75,8 +76,6 @@ Use mutate() to add a year column by adding 1945 to the session column.
 votes %>%
   filter(vote <= 3) %>%
   mutate(year = session + 1945 )
-
-
 ```
 
 ### Adding a country column
@@ -112,8 +111,6 @@ countrycode(100, "cown", "country.name")
 votes_processed <- votes %>%
   filter(vote <= 3) %>%
   mutate(year = session + 1945, country = countrycode(ccode, "cown", "country.name"))
-
-
 ```
 
 
@@ -130,7 +127,6 @@ total: with the number of votes
 percent_yes: the percentage of "yes" votes
 
 ```{r}
-
 # Print votes_processed
 votes_processed
 
@@ -139,8 +135,6 @@ votes_processed
 votes_processed %>%
 summarize(total = n(),
           percent_yes = mean(vote == 1))
-
-
 ```
 
 ### Summarizing by year
@@ -189,7 +183,6 @@ Use arrange() to sort the countries in ascending order of percent_yes.
 Arrange the countries by the same variable, but in descending order.
 
 ```{r}
-
 # You have the votes summarized by country
 by_country <- votes_processed %>%
   group_by(country) %>%
@@ -206,8 +199,6 @@ arrange(percent_yes)
 # Now sort in descending order
 by_country %>%
 arrange(desc(percent_yes))
-
-
 ```
 
 
@@ -232,12 +223,57 @@ by_country %>%
 
 Once you've cleaned and summarized data, you'll want to visualize them to understand trends and extract insights. Here you'll use the ggplot2 package to explore trends in United Nations voting within each country over time.
 
+### Plotting a line over time
+
+In the last chapter, you learned how to summarize() the votes dataset by year, particularly the percentage of votes in each year that were "yes".
+
+You'll now use the ggplot2 package to turn your results into a visualization of the percentage of "yes" votes over time.
+
+Instructions
+The by_year dataset has the number of votes and percentage of "yes" votes each year.
+
+Load the ggplot2 package.
+Use ggplot() with the geom_line layer to create a line plot with year on the x-axis and percent_yes on the y-axis.
+
+```{r}
+# Define by_year
+votes_processed
+
+by_year <- votes_processed %>%
+  group_by(year) %>%
+  summarize(total = n(),
+            percent_yes = mean(vote == 1))
+
+by_year
+
+# Load the ggplot2 package
+library("ggplot2")
+
+# Create line plot
+ggplot(by_year, aes(x = year, y = percent_yes )) +
+geom_line()
+```
 
 
+Other ggplot2 layers
+
+A line plot is one way to display this data. You could also choose to display it as a scatter plot, with each year represented as a single point. This requires changing the layer (i.e. geom_line() to geom_point()).
+
+You can also add additional layers to your graph, such as a smoothing curve with geom_smooth().
+
+Instructions
+Change the plot to a scatter plot and add a smoothing curve.
 
 
+```{r}
+# Change to scatter plot and add smoothing curve
+ggplot(by_year, aes(year, percent_yes)) +
+  geom_point()
 
-
+# Change to scatter plot and add smoothing curve
+ggplot(by_year, aes(year, percent_yes)) +
+  geom_point() + geom_smooth()
+```
 
 
 
