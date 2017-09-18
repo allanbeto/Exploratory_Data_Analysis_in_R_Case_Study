@@ -34,7 +34,10 @@ library("ggplot2")
 library("broom")
 library("tidyr")
 library("purrr")
+
 votes <- readRDS("votes.rds")
+descriptions <- readRDS("descriptions.rds")
+votes_joined <- readRDS("votes_joined.rds")
 ```
 
 
@@ -537,12 +540,12 @@ Use bind_rows() from dplyr to combine the two tidied models, printing the result
 ```{r}
 # Linear regression of percent_yes by year for US
 US_by_year <- by_year_country %>%
-  filter(country == "United States of America")
+                filter(country == "United States of America")
 US_fit <- lm(percent_yes ~ year, US_by_year)
 
 # Fit model for the United Kingdom
 UK_by_year <- by_year_country %>%
-  filter(country == "United Kingdom of Great Britain and Northern Ireland")
+                filter(country == "United Kingdom of Great Britain and Northern Ireland")
 UK_fit <- lm(percent_yes ~ year, UK_by_year)
 
 # Create US_tidied and UK_tidied
@@ -762,5 +765,240 @@ filtered_countries %>%
 ## Joining and tidying
 
 In this chapter, you'll learn to combine multiple related datasets, such as incorporating information about each resolution's topic into your vote analysis. You'll also learn how to turn untidy data into tidy data, and see how tidy data can guide your exploration of topics and countries over time.
+
+### Joining datasets with inner_join
+
+In the first chapter, you created the votes_processed dataset, containing information about each country's votes. You'll now combine that with the new descriptions dataset, which includes topic information about each country, so that you can analyze votes within particular topics.
+
+To do this, you'll make use of the inner_join() function from dplyr.
+
+Instructions
+Load the dplyr package.
+Print the votes_processed dataset.
+Print the new descriptions dataset.
+Join the two datasets using dplyr's inner_join(), using the rcid and session columns to match them. Save as votes_joined.
+
+```{r}
+# Load dplyr package
+library("dplyr")
+
+# Print the votes_processed dataset
+votes_processed
+
+# Print the descriptions dataset
+descriptions
+
+#Join them together based on the "rcid" and "session" columns
+
+# votes_joined <- votes_processed %>%
+#                 inner_join(descriptions, by = c("rcid", "session"))
+votes_joined
+
+
+```
+
+### Filtering the joined dataset
+
+There are six columns in the descriptions dataset (and therefore in the new joined dataset) that describe the topic of a resolution:
+
+me: Palestinian conflict
+nu: Nuclear weapons and nuclear material
+di: Arms control and disarmament
+hr: Human rights
+co: Colonialism
+ec: Economic development
+Each contains a 1 if the resolution is related to this topic and a 0 otherwise.
+
+Instructions
+Filter the votes_joined dataset for votes relating to colonialism.
+
+```{r}
+
+ # Filter for votes related to colonialism
+ votes_joined %>% 
+    filter(co==1)
+
+```
+
+ 
+### Visualizing colonialism votes
+
+In an earlier exercise, you graphed the percentage of votes each year where the US voted "yes". Now you'll create that same graph, but only for votes related to colonialism.
+
+Instructions
+Load the ggplot2 package.
+Filter the votes_joined dataset for only votes by the United States relating to colonialism, then summarize() the percentage of votes that are "yes" within each year. Name the resulting column percent_yes and save the entire data frame as US_co_by_year.
+Add a geom_line() layer to your ggplot() call to create a line graph of the percentage of "yes" votes on colonialism (percent_yes) cast by the US over time.
+
+
+```{r}
+# Load the ggplot2 package
+library("ggplot2")
+
+# Filter, then summarize by year: US_co_by_year
+US_co_by_year <- votes_joined %>% 
+                  filter (country == "United States of America", co == 1) %>%
+                  group_by(year) %>%
+                  summarise(percent_yes = mean(vote == 1))
+
+# Graph the % of "yes" votes over time
+ggplot(US_co_by_year, aes(x = year, y = percent_yes)) +
+  geom_line()
+```
+
+Tidy data observations
+
+According to the tidy data framework, which of the following counts as an observation in this graph?
+
+Possible Answers
+A country-vote-topic combination
+
+
+
+```{r}
+translations <- c(me = "Palestinian conflict",
+                  nu = "Nuclear weapons and nuclear material",
+                  di = "Arms control and disarmament",
+                  hr = "Human rights",
+                  co = "Colonialism",
+                  ec = "Economic development")
+
+votes_joined %>%
+  gather(topic, value, me:ec) %>%
+  filter(value == 1, country %in% c("United States of America",
+                                    "United Kingdom of Great Britain and Northern Ireland")) %>%
+  group_by(year, country, topic) %>%
+  summarize(percent_yes = mean(vote == 1)) %>%
+  ungroup() %>%
+  mutate(topic = plyr::revalue(topic, translations)) %>%
+  ggplot(aes(year, percent_yes, color = country)) +
+  geom_line() +
+  facet_wrap(~ topic) +
+  ylab("% of yes votes")
+
+```
+
+
+
+
+### Using gather to tidy a dataset
+
+In order to represent the joined vote-topic data in a tidy form so we can analyze and graph by topic, we need to transform the data so that each row has one combination of country-vote-topic. This will change the data from having six columns (me, nu, di, hr, co, ec) to having two columns (topic and has_topic).
+
+Instructions
+Load the tidyr package.
+Gather the six topic columns in votes_joined into one column called topic (containing one of me, nu, etc.) and a column called has_topic (containing 0 or 1). Print the result without saving it.
+You don't actually care about the cases where has_topic is 0. Perform the gather() operation again, but this time also filter for only the rows where the topic in topic describes the vote. Save the result as votes_gathered.
+
+```{r}
+# Load the tidyr package
+library("tidyr")
+
+# Gather the six me/nu/di/hr/co/ec columns
+votes_joined %>% 
+  gather(topic, has_topic, me:ec)
+
+# Perform gather again, then filter
+ votes_gathered <- votes_joined %>% 
+                    gather(topic, has_topic, me:ec) %>%
+                    filter(has_topic == 1)
+ 
+ votes_gathered
+ 
+```
+
+Recoding the topics
+
+There's one more step of data cleaning to make this more interpretable. Right now, topics are represented by two-letter codes:
+
+me: Palestinian conflict
+nu: Nuclear weapons and nuclear material
+di: Arms control and disarmament
+hr: Human rights
+co: Colonialism
+ec: Economic development
+So that you can interpret the data more easily, recode the data to replace these codes with their full name. You can do that with dplyr's recode() function, which replaces values with ones you specify:
+
+example <- c("apple", "banana", "apple", "orange")
+recode(example,
+       apple = "plum",
+       banana = "grape")
+Instructions
+Use the recode() function from dplyr in a mutate() to replace each two-letter code in the votes_gathered data frame with the corresponding full name. Save this as votes_tidied.
+
+```{r}
+# Replace the two-letter codes in topic: votes_tidied
+votes_tidied <- votes_gathered %>%
+  mutate(topic = recode(topic,
+                        me = "Palestinian conflict",
+                        nu = "Nuclear weapons and nuclear material",
+                        di = "Arms control and disarmament",
+                        hr = "Human rights",
+                        co = "Colonialism",
+                        ec = "Economic development"))
+
+votes_tidied
+
+```
+
+
+### Summarize by country, year, and topic
+
+In previous exercises, you summarized the votes dataset by country, by year, and by country-year combination.
+
+Now that you have topic as an additional variable, you can summarize the votes for each combination of country, year, and topic (e.g. for the United States in 2013 on the topic of nuclear weapons.)
+
+Instructions
+Print the votes_tidied dataset to the console.
+In a single summarize() call, compute both the total number of votes (total) and the percentage of "yes" votes (percent_yes) for each combination of country, year, and topic. Save this as by_country_year_topic. Make sure that you ungroup() after summarizing.
+Print the by_country_year_topic dataset to the console.
+
+
+```{r}
+
+# Print votes_tidied
+votes_tidied
+
+# Summarize the percentage "yes" per country-year-topic
+by_country_year_topic <- votes_tidied %>%
+                            group_by(country, year, topic) %>%
+                            summarise(total = n(),
+                            percent_yes = mean(vote == 1)) %>%
+                            ungroup()
+  
+
+# Print by_country_year_topic
+by_country_year_topic
+
+```
+
+
+### Visualizing trends in topics for one country
+
+You can now visualize the trends in percentage "yes" over time for all six topics side-by-side. Here, you'll visualize them just for the United States.
+
+Instructions
+Load the ggplot2 package.
+Filter the by_country_year_topic dataset for just the United States and save the result as US_by_country_year_topic.
+Use this dataset to graph the percentage "yes" over time for the United States, faceting by topic.
+
+
+
+```{r}
+# Load the ggplot2 package
+library("ggplot2")
+
+# Filter by_country_year_topic for just the US
+US_by_country_year_topic <- by_country_year_topic %>%
+                                filter(country=="United States of America")
+
+# Plot % yes over time for the US, faceting by topic
+ggplot(US_by_country_year_topic, aes(x = year, y = percent_yes)) +
+    geom_line() +
+    facet_wrap(~ topic)    
+```
+
+
+
 
 
