@@ -995,10 +995,112 @@ US_by_country_year_topic <- by_country_year_topic %>%
 # Plot % yes over time for the US, faceting by topic
 ggplot(US_by_country_year_topic, aes(x = year, y = percent_yes)) +
     geom_line() +
-    facet_wrap(~ topic)    
+    facet_wrap(~ topic) 
+
+ggplot(US_by_country_year_topic, aes(x = year, y = percent_yes, color = topic)) +
+    geom_point() + geom_smooth() +
+    facet_wrap(~ topic) 
+
+
 ```
 
 
+### Nesting by topic and country
+
+In the last chapter, you constructed a linear model for each country by nesting the data in each country, fitting a model to each dataset, then tidying each model with broom and unnesting the coefficients. The code looked something like this:
+
+country_coefficients <- by_year_country %>%
+  nest(-country) %>%
+  mutate(model = map(data, ~ lm(percent_yes ~ year, data = .)),
+         tidied = map(model, tidy)) %>%
+  unnest(tidied)
+Now, you'll again be modeling change in "percentage" yes over time, but instead of fitting one model for each country, you'll fit one for each combination of country and topic.
+
+Instructions
+Load the purrr, tidyr, and broom packages.
+Print the by_country_year_topic dataset to the console.
+Fit a linear model within each country and topic in this dataset, saving the result as country_topic_coefficients. You can use the above code as a starting point.
+Print the country_topic_coefficients dataset to the console.
+
+```{r}
+
+# Load purrr, tidyr, and broom
+library("purrr")
+library("tidyr")
+library("broom")
+# Print by_country_year_topic
+by_country_year_topic
+
+# Fit model on the by_country_year_topic dataset
+ by_country_year_topic %>%
+    nest(-country,-topic) %>%
+    mutate(model = map(data, ~ lm(percent_yes ~ year, data=.)),
+    tidied = map(model, tidy))
+
+country_topic_coefficients <- by_country_year_topic %>%
+                                    nest(-country,-topic) %>%
+                                    mutate(model = map(data, ~ lm(percent_yes ~ year, data=.)),
+                                           tidied = map(model, tidy)) %>%
+                                    unnest(tidied)
 
 
+
+# Print country_topic_coefficients
+country_topic_coefficients
+
+```
+
+
+### Interpreting tidy models
+
+Now you have both the slope and intercept terms for each model. Just as you did in the last chapter with the tidied coefficients, you'll need to filter for only the slope terms.
+
+You'll also have to extract only cases that are statistically significant, which means adjusting the p-value for the number of models, and then filtering to include only significant changes.
+
+Instructions
+Filter the country_topic_coefficients data to include only the slope term.
+Add a p.adjusted column containing adjusted p-values (using the p.adjust() function).
+Filter for only adjusted p-values less than .05.
+Save the result as country_topic_filtered.
+
+```{r}
+# Create country_topic_filtered
+country_topic_filtered <- country_topic_coefficients %>%
+                            filter(term == "year") %>%
+                            mutate(p.adjusted = p.adjust(p.value)) %>%
+                            filter(p.adjusted < .05)
+country_topic_filtered
+
+
+```
+
+### Checking models visually
+
+In the last exercise, you found that over its history, Vanuatu (an island nation in the Pacific Ocean) sharply changed its pattern of voting on the topic of Palestinian conflict.
+
+Let's examine this country's voting patterns more closely. Recall that the by_country_year_topic dataset contained one row for each combination of country, year, and topic. You can use that to create a plot of Vanuatu's voting, faceted by topic.
+
+Instructions
+Filter the by_country_year_topic variable for only Vanuatu's votes to create a vanuatu_by_country_year_topic object.
+Create a plot with year on the x-axis and percent_yes on the y-axis, and facet by topic.
+
+```{r}
+
+# Create vanuatu_by_country_year_topic
+vanuatu_by_country_year_topic <- by_country_year_topic %>% 
+                              filter(country == "Vanuatu")
+
+# Plot of percentage "yes" over time, faceted by topic
+ggplot(vanuatu_by_country_year_topic, aes(x = year, y = percent_yes)) +
+  geom_line() +
+  facet_wrap(~ topic)
+
+
+# Plot of percentage "yes" over time, faceted by topic
+ggplot(vanuatu_by_country_year_topic, aes(x = year, y = percent_yes, color = topic)) +
+  geom_point() + geom_smooth() +
+  facet_wrap(~ topic)
+
+
+```
 
